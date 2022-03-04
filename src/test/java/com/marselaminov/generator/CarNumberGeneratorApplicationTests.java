@@ -9,5 +9,4 @@ class CarNumberGeneratorApplicationTests {
     @Test
     void contextLoads() {
     }
-
 }

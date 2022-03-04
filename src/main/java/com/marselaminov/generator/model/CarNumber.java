@@ -8,7 +8,7 @@ import java.util.Objects;
 @Setter
 @Getter
 @Entity
-@Table(name = "carNumber")
+@Table(name = "car_number")
 public class CarNumber {
     @Id
     @GeneratedValue

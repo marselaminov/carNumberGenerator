@@ -11,21 +11,32 @@ public class CarNumberController {
     @Autowired
     private CarNumberService service;
 
+    // 1728000 = (12 * 10 * 10 * 10 * 12 * 12) - максимальный размер возможных комбинаций
+    private static final long maxRange = 1728000;
+
     @GetMapping("/random")
-    public String getRandom() {
+    public String getRandom() throws CarNumberException {
         CarNumber carNumber = new CarNumber();
+
+        if (service.getSizeOfCarNumbersTable() == maxRange)
+            throw new CarNumberException();
+
         carNumber.setNumber(service.randomNum());
         service.save(carNumber);
-        System.out.println(service.findById(carNumber.getId()));
+
         return carNumber.getNumber();
     }
 
     @GetMapping("/next")
     public String getNext() throws CarNumberException {
         CarNumber carNumber = new CarNumber();
+
+        if (service.getSizeOfCarNumbersTable() == maxRange)
+            throw new CarNumberException();
+
         carNumber.setNumber(service.nextNum());
         service.save(carNumber);
-        System.out.println(service.findById(carNumber.getId()));
+
         return carNumber.getNumber();
     }
 }

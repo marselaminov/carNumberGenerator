@@ -16,21 +16,27 @@ public class CarNumberService {
 
     private final static String suffix = " 116 RUS";
 
+    // храню в списке согласно условию проекта
     private final static List<Character> numberLetters =
-            "АЕТОРНУКХСВМ".chars().mapToObj(c -> (char) c).collect(Collectors.toList());
+            "АЕТОРНУКХСВМ".chars().sorted().mapToObj(c -> (char) c).collect(Collectors.toList());
 
-    private int index = 995;
-    private static int firstLetter = 11;
-    private static int secondLetter = 11;
-    private static int thirdLetter = 11;
+    private static int index;
+    private static int firstLetter;
+    private static int secondLetter;
+    private static int thirdLetter;
+
 
     public String nextNum() throws CarNumberException {
         StringBuilder allNumber = new StringBuilder();
         StringBuilder onlyDigits = new StringBuilder();
 
-        boundsCheck();
+        if (init() == null) // получаем последнюю запись таблицы и если ее нет возвращаем "А000АА 116 RUS"
+            return "А000АА 116 RUS";
 
-        allNumber.append(numberLetters.get(firstLetter));
+        boundsCheck(); // проверяем границы диапазонов
+
+        // соединяем полный номер частями
+        allNumber.append(numberLetters.get(firstLetter)); //1
 
         if (index < 10)
             onlyDigits.append("00");
@@ -38,31 +44,49 @@ public class CarNumberService {
             onlyDigits.append("0");
         onlyDigits.append(index);
 
-        allNumber.append(onlyDigits);
-        allNumber.append(numberLetters.get(secondLetter));
-        allNumber.append(numberLetters.get(thirdLetter));
-        allNumber.append(suffix);
-
-        index += 1;
+        allNumber.append(onlyDigits); // 2
+        allNumber.append(numberLetters.get(secondLetter)); // 3
+        allNumber.append(numberLetters.get(thirdLetter)); // 4
+        allNumber.append(suffix); // const
 
         return allNumber.toString();
     }
 
-    public void boundsCheck() throws CarNumberException {
+    private String init() {
+        CarNumber lastCarNumber;
+
+        lastCarNumber = repository.getLastElementFromTable();
+
+        if (lastCarNumber == null) {
+            lastCarNumber = new CarNumber();
+            lastCarNumber.setNumber("А000АА 116 RUS");
+            return null;
+        }
+
+        index = Integer.parseInt(lastCarNumber.getNumber().substring(1, 4));
+        index += 1;
+
+        firstLetter = numberLetters.indexOf(lastCarNumber.getNumber().charAt(0));
+        secondLetter = numberLetters.indexOf(lastCarNumber.getNumber().charAt(4));
+        thirdLetter = numberLetters.indexOf(lastCarNumber.getNumber().charAt(5));
+
+        return "ok";
+    }
+
+    private void boundsCheck() throws CarNumberException {
         if (index > 999) {
-            firstLetter += 1;
+            thirdLetter += 1;
             index = 0;
         }
-        else if (firstLetter >= numberLetters.size()) { // как только перебрали все вариации первой буквы
+        else if (thirdLetter >= numberLetters.size()) { // как только перебрали все вариации третьей буквы
             secondLetter += 1; // перебираем вторую
-            firstLetter = 0; // смещаем первую обратно в начало
+            thirdLetter = 0; // смещаем первую обратно в начало
         }
-        // то же самое производим со второй буквой номера
-        else if (secondLetter >= numberLetters.size()) {
-            thirdLetter += 1;
+        else if (secondLetter >= numberLetters.size()) { // то же самое производим со второй буквой номера
+            firstLetter += 1;
             secondLetter = 0;
         }
-        else if (thirdLetter >= numberLetters.size())
+        else if (firstLetter >= numberLetters.size()) // если перебрали все комбинации
             throw new CarNumberException();
     }
 
@@ -70,7 +94,8 @@ public class CarNumberService {
         StringBuilder allNumber = new StringBuilder();
         StringBuilder onlyDigits = new StringBuilder();
 
-        allNumber.append(numberLetters.get((int) (Math.random() * numberLetters.size()))); // будут числа индекса от 0 до размера size - 1
+        // будут числа индекса от 0 до размера size - 1
+        allNumber.append(numberLetters.get((int) (Math.random() * numberLetters.size())));
 
         for (int i = 0; i <= 2; i++) {
             onlyDigits.append((int) (Math.random() * 10));
@@ -88,11 +113,11 @@ public class CarNumberService {
         repository.save(number);
     }
 
-    public List<CarNumber> findAll() {
-        return repository.findAll();
-    }
-
     public Optional<CarNumber> findById(Long id) {
         return repository.findById(id);
+    }
+
+    public Long getSizeOfCarNumbersTable() {
+        return repository.getCarNumberAllSize();
     }
 }
