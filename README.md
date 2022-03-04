@@ -1,2 +1,7 @@
-# carNumberGenerator
-pet-project (REST API, Spring Boot, Spring MVC, Spring Data, PostgreSQL, Docker, Maven)
+# Генерация автомобтльного номера 
+
+## Запуск проекта:
+
+1. ./start.sh
+
+Для запуска необходимо, чтобы был Docker :)
