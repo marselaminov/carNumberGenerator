@@ -1,4 +1,5 @@
 package com.marselaminov.generator.model;
+
 import lombok.*;
 import javax.persistence.*;
 import java.util.Objects;
@@ -8,6 +9,7 @@ import java.util.Objects;
 @Setter
 @Getter
 @Entity
+@Builder
 @Table(name = "car_number")
 public class CarNumber {
     @Id

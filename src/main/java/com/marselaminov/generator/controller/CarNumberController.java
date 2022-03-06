@@ -1,10 +1,12 @@
 package com.marselaminov.generator.controller;
-import com.marselaminov.generator.exception.CarNumberException;
+
 import com.marselaminov.generator.model.CarNumber;
 import com.marselaminov.generator.service.CarNumberService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Objects;
 
 @RestController
 public class CarNumberController {
@@ -15,11 +17,16 @@ public class CarNumberController {
     private static final long maxRange = 1728000;
 
     @GetMapping("/random")
-    public String getRandom() throws CarNumberException {
+    public String getRandom() {
         CarNumber carNumber = new CarNumber();
 
         if (service.getSizeOfCarNumbersTable() == maxRange)
-            throw new CarNumberException();
+            return "There are no more car number combinations";
+
+        String num = service.randomNum();
+
+        if (Objects.equals(num, "Car numbers is over!"))
+            return "Car numbers is over!";
 
         carNumber.setNumber(service.randomNum());
         service.save(carNumber);
@@ -28,13 +35,18 @@ public class CarNumberController {
     }
 
     @GetMapping("/next")
-    public String getNext() throws CarNumberException {
+    public String getNext() {
         CarNumber carNumber = new CarNumber();
 
         if (service.getSizeOfCarNumbersTable() == maxRange)
-            throw new CarNumberException();
+            return "There are no more car number combinations";
 
-        carNumber.setNumber(service.nextNum());
+        String num = service.nextNum();
+
+        if (Objects.equals(num, "Car numbers is over!"))
+            return "Car numbers is over!";
+
+        carNumber.setNumber(num);
         service.save(carNumber);
 
         return carNumber.getNumber();

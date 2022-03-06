@@ -1,6 +1,5 @@
 package com.marselaminov.generator.service;
 
-import com.marselaminov.generator.exception.CarNumberException;
 import com.marselaminov.generator.model.CarNumber;
 import com.marselaminov.generator.repository.CarNumberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,14 +25,15 @@ public class CarNumberService {
     private static int thirdLetter;
 
 
-    public String nextNum() throws CarNumberException {
+    public String nextNum() {
         StringBuilder allNumber = new StringBuilder();
         StringBuilder onlyDigits = new StringBuilder();
 
         if (init() == null) // получаем последнюю запись таблицы и если ее нет возвращаем "А000АА 116 RUS"
             return "А000АА 116 RUS";
 
-        boundsCheck(); // проверяем границы диапазонов
+        if (boundsCheck() == null) // проверяем границы диапазонов
+            return "Car numbers is over!";
 
         // соединяем полный номер частями
         allNumber.append(numberLetters.get(firstLetter)); //1
@@ -73,8 +73,10 @@ public class CarNumberService {
         return "ok";
     }
 
-    private void boundsCheck() throws CarNumberException {
-        if (index > 999) {
+    private String boundsCheck() throws IndexOutOfBoundsException{
+        if (index > 999 && thirdLetter + 1 >= numberLetters.size())
+            return null;
+        else if (index > 999) {
             thirdLetter += 1;
             index = 0;
         }
@@ -87,12 +89,14 @@ public class CarNumberService {
             secondLetter = 0;
         }
         else if (firstLetter >= numberLetters.size()) // если перебрали все комбинации
-            throw new CarNumberException();
+            firstLetter = 0;
+        return "ok";
     }
 
     public String randomNum() {
         StringBuilder allNumber = new StringBuilder();
         StringBuilder onlyDigits = new StringBuilder();
+        CarNumber lastCarNumber;
 
         // будут числа индекса от 0 до размера size - 1
         allNumber.append(numberLetters.get((int) (Math.random() * numberLetters.size())));
@@ -105,6 +109,12 @@ public class CarNumberService {
         allNumber.append(numberLetters.get((int) (Math.random() * numberLetters.size())));
         allNumber.append(numberLetters.get((int) (Math.random() * numberLetters.size())));
         allNumber.append(suffix);
+
+        lastCarNumber = repository.getLastElementFromTable();
+        if (lastCarNumber == null)
+            return allNumber.toString();
+        else if (lastCarNumber.getNumber().equals("Х999ХХ 116 RUS"))
+            return "Car numbers is over!";
 
         return allNumber.toString();
     }
@@ -119,5 +129,9 @@ public class CarNumberService {
 
     public Long getSizeOfCarNumbersTable() {
         return repository.getCarNumberAllSize();
+    }
+
+    public CarNumber getLastElementFromTable() {
+        return repository.getLastElementFromTable();
     }
 }
