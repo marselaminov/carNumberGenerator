@@ -9,7 +9,7 @@ services:
 #    just container name
     container_name: app
     ports:
-      - "8189:8189"
+      - "8080:8080"
       #    depends on the db service, that's why it starts after the db container
     depends_on:
       - db
