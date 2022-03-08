@@ -19,38 +19,30 @@ public class CarNumberController {
     @GetMapping("/random")
     public String getRandom() {
         CarNumber carNumber = new CarNumber();
+        String num = service.randomNum();
 
         if (service.getSizeOfCarNumbersTable() == maxRange) {
             return "There are no more car number combinations";
         }
-
-        String num = service.randomNum();
-
         if (Objects.equals(num, "Car numbers is over!")) {
             return "Car numbers is over!";
         }
-
         carNumber.setNumber(num);
-
         return carNumber.getNumber();
     }
 
     @GetMapping("/next")
     public String getNext() {
         CarNumber carNumber = new CarNumber();
+        String num = service.nextNum();
 
         if (service.getSizeOfCarNumbersTable() == maxRange) {
             return "There are no more car number combinations";
         }
-
-        String num = service.nextNum();
-
         if (Objects.equals(num, "Car numbers is over!")) {
             return "Car numbers is over!";
         }
-
         carNumber.setNumber(num);
-
         return carNumber.getNumber();
     }
 }

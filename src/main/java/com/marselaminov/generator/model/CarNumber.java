@@ -12,6 +12,7 @@ import java.util.Objects;
 @Builder
 @Table(name = "car_number")
 public class CarNumber {
+
     @Id
     @GeneratedValue
     @Column(name = "id")
