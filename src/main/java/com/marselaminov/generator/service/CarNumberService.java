@@ -4,6 +4,7 @@ import com.marselaminov.generator.model.CarNumber;
 import com.marselaminov.generator.repository.CarNumberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -24,7 +25,7 @@ public class CarNumberService {
     private static int secondLetter;
     private static int thirdLetter;
 
-
+    @Transactional
     public String nextNum() {
         StringBuilder allNumber = new StringBuilder();
         StringBuilder onlyDigits = new StringBuilder();
@@ -49,6 +50,8 @@ public class CarNumberService {
         allNumber.append(numberLetters.get(thirdLetter)); // 4
         allNumber.append(suffix); // const
 
+        repository.save(CarNumber.builder().number(allNumber.toString()).build());
+
         return allNumber.toString();
     }
 
@@ -56,10 +59,8 @@ public class CarNumberService {
         CarNumber lastCarNumber;
 
         lastCarNumber = repository.getLastElementFromTable();
-
         if (lastCarNumber == null) {
-            lastCarNumber = new CarNumber();
-            lastCarNumber.setNumber("А000АА 116 RUS");
+            repository.save(CarNumber.builder().number("А000АА 116 RUS").build());
             return null;
         }
 
@@ -93,6 +94,7 @@ public class CarNumberService {
         return "ok";
     }
 
+    @Transactional
     public String randomNum() {
         StringBuilder allNumber = new StringBuilder();
         StringBuilder onlyDigits = new StringBuilder();
@@ -111,27 +113,25 @@ public class CarNumberService {
         allNumber.append(suffix);
 
         lastCarNumber = repository.getLastElementFromTable();
-        if (lastCarNumber == null)
+        if (lastCarNumber == null) {
+            repository.save(CarNumber.builder().number(allNumber.toString()).build());
             return allNumber.toString();
+        }
         else if (lastCarNumber.getNumber().equals("Х999ХХ 116 RUS"))
             return "Car numbers is over!";
+
+        repository.save(CarNumber.builder().number(allNumber.toString()).build());
 
         return allNumber.toString();
     }
 
-    public void save(CarNumber number) {
+    @Transactional
+    public void save(CarNumber number) { // для теста
         repository.save(number);
     }
 
-    public Optional<CarNumber> findById(Long id) {
-        return repository.findById(id);
-    }
-
+    @Transactional
     public Long getSizeOfCarNumbersTable() {
         return repository.getCarNumberAllSize();
-    }
-
-    public CarNumber getLastElementFromTable() {
-        return repository.getLastElementFromTable();
     }
 }

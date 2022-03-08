@@ -28,8 +28,7 @@ public class CarNumberController {
         if (Objects.equals(num, "Car numbers is over!"))
             return "Car numbers is over!";
 
-        carNumber.setNumber(service.randomNum());
-        service.save(carNumber);
+        carNumber.setNumber(num);
 
         return carNumber.getNumber();
     }
@@ -47,7 +46,6 @@ public class CarNumberController {
             return "Car numbers is over!";
 
         carNumber.setNumber(num);
-        service.save(carNumber);
 
         return carNumber.getNumber();
     }
