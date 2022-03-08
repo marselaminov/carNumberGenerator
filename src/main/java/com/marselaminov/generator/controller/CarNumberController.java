@@ -20,13 +20,15 @@ public class CarNumberController {
     public String getRandom() {
         CarNumber carNumber = new CarNumber();
 
-        if (service.getSizeOfCarNumbersTable() == maxRange)
+        if (service.getSizeOfCarNumbersTable() == maxRange) {
             return "There are no more car number combinations";
+        }
 
         String num = service.randomNum();
 
-        if (Objects.equals(num, "Car numbers is over!"))
+        if (Objects.equals(num, "Car numbers is over!")) {
             return "Car numbers is over!";
+        }
 
         carNumber.setNumber(num);
 
@@ -37,13 +39,15 @@ public class CarNumberController {
     public String getNext() {
         CarNumber carNumber = new CarNumber();
 
-        if (service.getSizeOfCarNumbersTable() == maxRange)
+        if (service.getSizeOfCarNumbersTable() == maxRange) {
             return "There are no more car number combinations";
+        }
 
         String num = service.nextNum();
 
-        if (Objects.equals(num, "Car numbers is over!"))
+        if (Objects.equals(num, "Car numbers is over!")) {
             return "Car numbers is over!";
+        }
 
         carNumber.setNumber(num);
 

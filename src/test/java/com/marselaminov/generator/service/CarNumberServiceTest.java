@@ -32,20 +32,23 @@ public class CarNumberServiceTest {
 
     @Test
     public void overAllNumberCombinationTest() {
-        if (service.randomNum().equals("Х999ХХ 116 RUS"))
+        if (service.randomNum().equals("Х999ХХ 116 RUS")) {
             assertEquals("Car numbers is over!", service.nextNum());
+        }
     }
 
     @Test
     public void getErrorIfTableIsFull() {
         long maxTableSize = 1728000;
-        if (service.getSizeOfCarNumbersTable() == maxTableSize)
+        if (service.getSizeOfCarNumbersTable() == maxTableSize) {
             assertEquals("There are no more car number combinations", service.nextNum());
+        }
     }
 
     @Test
     public void getRandomAndThenCallNextTest() {
-        if (service.randomNum().equals("Е187ОУ 116 RUS"))
+        if (service.randomNum().equals("Е187ОУ 116 RUS")) {
             assertEquals("Е188ОУ 116 RUS", service.nextNum());
+        }
     }
 }

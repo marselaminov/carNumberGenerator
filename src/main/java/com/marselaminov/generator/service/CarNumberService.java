@@ -30,19 +30,21 @@ public class CarNumberService {
         StringBuilder allNumber = new StringBuilder();
         StringBuilder onlyDigits = new StringBuilder();
 
-        if (init() == null) // получаем последнюю запись таблицы и если ее нет возвращаем "А000АА 116 RUS"
+        if (init() == null) { // получаем последнюю запись таблицы и если ее нет возвращаем "А000АА 116 RUS"
             return "А000АА 116 RUS";
-
-        if (boundsCheck() == null) // проверяем границы диапазонов
+        }
+        if (boundsCheck() == null) { // проверяем границы диапазонов
             return "Car numbers is over!";
-
+        }
         // соединяем полный номер частями
         allNumber.append(numberLetters.get(firstLetter)); //1
 
-        if (index < 10)
+        if (index < 10) {
             onlyDigits.append("00");
-        else if (index < 100)
+        }
+        else if (index < 100) {
             onlyDigits.append("0");
+        }
         onlyDigits.append(index);
 
         allNumber.append(onlyDigits); // 2
@@ -75,8 +77,9 @@ public class CarNumberService {
     }
 
     private String boundsCheck() throws IndexOutOfBoundsException{
-        if (index > 999 && thirdLetter + 1 >= numberLetters.size())
+        if (index > 999 && thirdLetter + 1 >= numberLetters.size()) {
             return null;
+        }
         else if (index > 999) {
             thirdLetter += 1;
             index = 0;
@@ -89,8 +92,9 @@ public class CarNumberService {
             firstLetter += 1;
             secondLetter = 0;
         }
-        else if (firstLetter >= numberLetters.size()) // если перебрали все комбинации
+        else if (firstLetter >= numberLetters.size()) { // если перебрали все комбинации
             firstLetter = 0;
+        }
         return "ok";
     }
 
@@ -99,7 +103,6 @@ public class CarNumberService {
         StringBuilder allNumber = new StringBuilder();
         StringBuilder onlyDigits = new StringBuilder();
         CarNumber lastCarNumber;
-
         // будут числа индекса от 0 до размера size - 1
         allNumber.append(numberLetters.get((int) (Math.random() * numberLetters.size())));
 
@@ -117,8 +120,12 @@ public class CarNumberService {
             repository.save(CarNumber.builder().number(allNumber.toString()).build());
             return allNumber.toString();
         }
-        else if (lastCarNumber.getNumber().equals("Х999ХХ 116 RUS"))
+        else if (lastCarNumber.getNumber().equals("Х999ХХ 116 RUS")) {
             return "Car numbers is over!";
+        }
+        else if (allNumber.toString().equals(lastCarNumber.getNumber())) {
+            return "The number must not be repeated, please try again!";
+        }
 
         repository.save(CarNumber.builder().number(allNumber.toString()).build());
 
