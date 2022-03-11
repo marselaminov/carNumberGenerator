@@ -15,16 +15,6 @@ public class CarNumberServiceTest {
     private CarNumberService service;
 
     @Test
-    public void justGetFirstNumberTest() {
-        CarNumber.builder().number(service.nextNum()).build();
-    }
-
-    @Test
-    public void justGetRandomNumberTest() {
-        CarNumber.builder().number(service.randomNum()).build();
-    }
-
-    @Test
     public void getNewThirdLetterAndZeroWhenNumberIsLastTest() {
         service.save(CarNumber.builder().number("А999АА 116 RUS").build());
         assertEquals("А000АВ 116 RUS", service.nextNum());

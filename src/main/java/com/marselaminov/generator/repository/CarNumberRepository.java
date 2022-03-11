@@ -7,6 +7,8 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface CarNumberRepository extends JpaRepository<CarNumber, Long> {
+    CarNumber findCarNumberByNumber(String number);
+
     @Query(value ="select * from car_number order by id desc limit 1", nativeQuery = true)
     CarNumber getLastElementFromTable();
 

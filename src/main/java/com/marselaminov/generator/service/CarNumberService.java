@@ -6,13 +6,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 public class CarNumberService {
     @Autowired
     private CarNumberRepository repository;
+
+    // 1728000 = (12 * 10 * 10 * 10 * 12 * 12) - максимальный размер возможных комбинаций
+    private final static long MAX_RANGE = 1728000;
 
     private final static String SUFFIX = " 116 RUS";
 
@@ -25,17 +28,16 @@ public class CarNumberService {
     private static int secondLetter;
     private static int thirdLetter;
 
-    @Transactional
     public String nextNum() {
         StringBuilder allNumber = new StringBuilder();
         StringBuilder onlyDigits = new StringBuilder();
-        CarNumber lastCarNumber = repository.getLastElementFromTable();
+        CarNumber lastCarNumber = getLastElementFromTable();
 
         // получаем последнюю запись таблицы и если ее нет возвращаем "А000АА 116 RUS"
-        if (init(lastCarNumber) == null) {
+        if (!getLastNumber(lastCarNumber)) {
             return "А000АА 116 RUS";
         }
-        if (boundsCheck() == null) { // проверяем границы диапазонов
+        if (outOfBoundsCheck()) { // проверяем границы диапазонов
             return "Car numbers is over!";
         }
 
@@ -53,29 +55,31 @@ public class CarNumberService {
         allNumber.append(SUFFIX); // const
         if (lastCarNumber.getNumber().equals("Х999ХХ 116 RUS")) {
             return "Car numbers is over!";
-        } else if (allNumber.toString().equals(lastCarNumber.getNumber())) {
-            return "The number must not be repeated, please try again!";
+        } else if (findCarNumberByNumber(allNumber.toString()) != null) { // проверяем на дубликаты
+            return nextNum();
+        } else if (getSizeOfCarNumbersTable() == MAX_RANGE) {
+            return "There are no more car number combinations";
         }
-        repository.save(CarNumber.builder().number(allNumber.toString()).build()); // сохраняем в БД
+        save(CarNumber.builder().number(allNumber.toString()).build()); // сохраняем в БД
         return allNumber.toString();
     }
 
-    private String init(CarNumber lastCarNumber) {
+    private boolean getLastNumber(CarNumber lastCarNumber) {
         if (lastCarNumber == null) {
-            repository.save(CarNumber.builder().number("А000АА 116 RUS").build());
-            return null;
+            save(CarNumber.builder().number("А000АА 116 RUS").build());
+            return false;
         }
         index = Integer.parseInt(lastCarNumber.getNumber().substring(1, 4));
         index += 1;
         firstLetter = NUMBER_LETTERS.indexOf(lastCarNumber.getNumber().charAt(0));
         secondLetter = NUMBER_LETTERS.indexOf(lastCarNumber.getNumber().charAt(4));
         thirdLetter = NUMBER_LETTERS.indexOf(lastCarNumber.getNumber().charAt(5));
-        return "ok";
+        return true;
     }
 
-    private String boundsCheck() throws IndexOutOfBoundsException{
+    private boolean outOfBoundsCheck() throws IndexOutOfBoundsException{
         if (index > 999 && thirdLetter + 1 >= NUMBER_LETTERS.size()) {
-            return null;
+            return true;
         } else if (index > 999) {
             thirdLetter += 1;
             index = 0;
@@ -88,14 +92,13 @@ public class CarNumberService {
         } else if (firstLetter >= NUMBER_LETTERS.size()) { // если перебрали все комбинации
             firstLetter = 0;
         }
-        return "ok";
+        return false;
     }
 
-    @Transactional
     public String randomNum() {
         StringBuilder allNumber = new StringBuilder();
         StringBuilder onlyDigits = new StringBuilder();
-        CarNumber lastCarNumber = repository.getLastElementFromTable();
+        CarNumber lastCarNumber = getLastElementFromTable();
 
         // будут числа индекса от 0 до размера size - 1
         allNumber.append(NUMBER_LETTERS.get((int) (Math.random() * NUMBER_LETTERS.size())));
@@ -107,19 +110,31 @@ public class CarNumberService {
         allNumber.append(NUMBER_LETTERS.get((int) (Math.random() * NUMBER_LETTERS.size())));
         allNumber.append(SUFFIX);
         if (lastCarNumber == null) {
-            repository.save(CarNumber.builder().number(allNumber.toString()).build());
+            save(CarNumber.builder().number(allNumber.toString()).build());
             return allNumber.toString();
-        } else if (lastCarNumber.getNumber().equals("Х999ХХ 116 RUS")) {
+        } else if (lastCarNumber.getNumber().equals("Х999ХХ 116 RUS") && getSizeOfCarNumbersTable() == MAX_RANGE) {
             return "Car numbers is over!";
-        } else if (allNumber.toString().equals(lastCarNumber.getNumber())) {
-            return "The number must not be repeated, please try again!";
+        } else if (findCarNumberByNumber(allNumber.toString()) != null) { // проверяем на дубликаты
+            return randomNum();
+        } else if (getSizeOfCarNumbersTable() == MAX_RANGE) {
+            return "There are no more car number combinations";
         }
-        repository.save(CarNumber.builder().number(allNumber.toString()).build()); // сохраняем в БД
+        save(CarNumber.builder().number(allNumber.toString()).build()); // сохраняем в БД
         return allNumber.toString();
     }
 
     @Transactional
-    public void save(CarNumber number) { // для теста
+    public CarNumber findCarNumberByNumber(String number) {
+        return repository.findCarNumberByNumber(number);
+    }
+
+    @Transactional
+    public CarNumber getLastElementFromTable() {
+        return repository.getLastElementFromTable();
+    }
+
+    @Transactional
+    public void save(CarNumber number) {
         repository.save(number);
     }
 
